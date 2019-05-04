@@ -2,11 +2,14 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/clear"
+        android:id="@+id/game"
         android:icon="@drawable/ic_delete_white_24dp"
-        android:title="Clear"
+        android:title="Game"
         app:showAsAction="always" />
     <item
         android:id="@+id/newline"
         android:title="Newline Mode" />
+    <item
+        android:id="@+id/clear"
+        android:title="Clear" />
 </menu>
