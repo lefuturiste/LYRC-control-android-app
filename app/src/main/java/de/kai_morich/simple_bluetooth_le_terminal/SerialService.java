@@ -5,10 +5,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -17,7 +15,6 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -28,7 +25,9 @@ import java.util.Queue;
 public class SerialService extends Service implements SerialListener {
 
     class SerialBinder extends Binder {
-        SerialService getService() { return SerialService.this; }
+        SerialService getService() {
+            return SerialService.this;
+        }
     }
 
     private enum QueueType {Connect, ConnectError, Read, IoError}
@@ -38,7 +37,11 @@ public class SerialService extends Service implements SerialListener {
         byte[] data;
         Exception e;
 
-        QueueItem(QueueType type, byte[] data, Exception e) { this.type=type; this.data=data; this.e=e; }
+        QueueItem(QueueType type, byte[] data, Exception e) {
+            this.type = type;
+            this.data = data;
+            this.e = e;
+        }
     }
 
     private final Handler mainLooper;
@@ -88,30 +91,46 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void attach(SerialListener listener) {
-        if(Looper.getMainLooper().getThread() != Thread.currentThread())
+        if (Looper.getMainLooper().getThread() != Thread.currentThread())
             throw new IllegalArgumentException("not in main thread");
         cancelNotification();
         // use synchronized() to prevent new items in queue2
         // new items will not be added to queue1 because mainLooper.post and attach() run in main thread
-        if(connected) {
+        if (connected) {
             synchronized (this) {
                 this.listener = listener;
             }
         }
-        for(QueueItem item : queue1) {
-            switch(item.type) {
-                case Connect:       listener.onSerialConnect      (); break;
-                case ConnectError:  listener.onSerialConnectError (item.e); break;
-                case Read:          listener.onSerialRead         (item.data); break;
-                case IoError:       listener.onSerialIoError      (item.e); break;
+        for (QueueItem item : queue1) {
+            switch (item.type) {
+                case Connect:
+                    listener.onSerialConnect();
+                    break;
+                case ConnectError:
+                    listener.onSerialConnectError(item.e);
+                    break;
+                case Read:
+                    listener.onSerialRead(item.data);
+                    break;
+                case IoError:
+                    listener.onSerialIoError(item.e);
+                    break;
             }
         }
-        for(QueueItem item : queue2) {
-            switch(item.type) {
-                case Connect:       listener.onSerialConnect      (); break;
-                case ConnectError:  listener.onSerialConnectError (item.e); break;
-                case Read:          listener.onSerialRead         (item.data); break;
-                case IoError:       listener.onSerialIoError      (item.e); break;
+        for (QueueItem item : queue2) {
+            switch (item.type) {
+                case Connect:
+                    listener.onSerialConnect();
+                    break;
+                case ConnectError:
+                    listener.onSerialConnectError(item.e);
+                    break;
+                case Read:
+                    listener.onSerialRead(item.data);
+                    break;
+                case IoError:
+                    listener.onSerialIoError(item.e);
+                    break;
             }
         }
         queue1.clear();
@@ -119,7 +138,7 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void detach() {
-        if(connected)
+        if (connected)
             createNotification();
         // items already in event queue (posted before detach() to mainLooper) will end up in queue1
         // items occurring later, will be moved directly to queue2
@@ -141,7 +160,7 @@ public class SerialService extends Service implements SerialListener {
                 .setAction(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_LAUNCHER);
         PendingIntent disconnectPendingIntent = PendingIntent.getBroadcast(this, 1, disconnectIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent restartPendingIntent = PendingIntent.getActivity(this, 1, restartIntent,  PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent restartPendingIntent = PendingIntent.getActivity(this, 1, restartIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setColor(getResources().getColor(R.color.colorPrimary))
@@ -164,7 +183,7 @@ public class SerialService extends Service implements SerialListener {
      * SerialListener
      */
     public void onSerialConnect() {
-        if(connected) {
+        if (connected) {
             synchronized (this) {
                 if (listener != null) {
                     mainLooper.post(() -> {
@@ -182,7 +201,7 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void onSerialConnectError(Exception e) {
-        if(connected) {
+        if (connected) {
             synchronized (this) {
                 if (listener != null) {
                     mainLooper.post(() -> {
@@ -204,7 +223,7 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void onSerialRead(byte[] data) {
-        if(connected) {
+        if (connected) {
             synchronized (this) {
                 if (listener != null) {
                     mainLooper.post(() -> {
@@ -222,7 +241,7 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void onSerialIoError(Exception e) {
-        if(connected) {
+        if (connected) {
             synchronized (this) {
                 if (listener != null) {
                     mainLooper.post(() -> {
