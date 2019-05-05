@@ -8,6 +8,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -23,15 +25,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 public class GameFragment extends Fragment implements ServiceConnection, SerialListener {
+
+    private View view;
 
     private enum Connected {False, Pending, True}
 
     private String deviceAddress;
-    private String newline = "\r\n";
+    private String newline = "\n";
 
     private TextView receiveText;
 
@@ -55,6 +62,16 @@ public class GameFragment extends Fragment implements ServiceConnection, SerialL
         setHasOptionsMenu(true);
         setRetainInstance(true);
         deviceAddress = getArguments().getString("device");
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            activity.registerOrientationListener(this::onOrientationChange);
+        } else {
+            System.out.println("ERR: Cannot register orientation listener because activity is null");
+        }
+    }
+
+    private void onOrientationChange(int orientation) {
+        this.updateOrientationMessage(orientation);
     }
 
     @Override
@@ -126,34 +143,64 @@ public class GameFragment extends Fragment implements ServiceConnection, SerialL
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_game, container, false);
+        view = inflater.inflate(R.layout.fragment_game, container, false);
         receiveText = view.findViewById(R.id.receive_text);                          // TextView performance decreases with number of spans
         receiveText.setTextColor(getResources().getColor(R.color.colorRecieveText)); // set as default color to reduce number of spans
         receiveText.setMovementMethod(ScrollingMovementMethod.getInstance());
         view.findViewById(R.id.buttonAction1).setOnClickListener(v -> buttonAction1Call());
         view.findViewById(R.id.buttonAction2).setOnClickListener(v -> buttonAction2Call());
-
         JoystickView joystick = view.findViewById(R.id.joystick);
         joystick.setOnMoveListener(this::joystickUpdate);
+        this.updateOrientationMessage(getResources().getConfiguration().orientation);
+        ToggleButton toggle = view.findViewById(R.id.togglebutton);
+        LinearLayout flagOne = view.findViewById(R.id.flag_one);
+//        LinearLayout flagTwo = view.findViewById(R.id.flag_two);
+        String redColor = "#c0392b";
+        String greenColor = "#27AE60";
+        toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                System.out.println("TRUE");
+                flagOne.setBackgroundColor(Color.parseColor(greenColor));
+            } else {
+                System.out.println("FALSE");
+                flagOne.setBackgroundColor(Color.parseColor(redColor));
+            }
+        });
         return view;
+    }
+
+    private void updateOrientationMessage(int orientation) {
+        TextView textView = view.findViewById(R.id.game_portrait_text);
+        View mainLayout = view.findViewById(R.id.game_main_layout);
+        View textLayout = view.findViewById(R.id.game_portrait_layout);
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mainLayout.setVisibility(LinearLayout.GONE);
+            textLayout.setVisibility(LinearLayout.VISIBLE);
+            textView.setText("<tourne ton tel stp>");
+        } else {
+            mainLayout.setVisibility(LinearLayout.VISIBLE);
+            textLayout.setVisibility(LinearLayout.GONE);
+            textView.setText("");
+        }
     }
 
     private void joystickUpdate(int angle, int strength) {
         if (angle != joystickAngle || strength != joystickStrength) {
             joystickAngle = angle;
             joystickStrength = strength;
-            String data = "J: " + angle + "; " + strength;
+            String data = "JOY#" + angle + "#" + strength;
             System.out.println(data);
             this.send(data);
         }
     }
 
+
     private void buttonAction1Call() {
-        this.send("ACTION1");
+        this.send("PING");
     }
 
     private void buttonAction2Call() {
-        this.send("ACTION2");
+        this.send("HELLO");
     }
 
     @Override

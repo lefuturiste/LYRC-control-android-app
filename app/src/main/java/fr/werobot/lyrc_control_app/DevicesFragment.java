@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,6 +41,7 @@ public class DevicesFragment extends ListFragment {
 
     private ArrayList<BluetoothDevice> listItems = new ArrayList<>();
     private ArrayAdapter<BluetoothDevice> listAdapter;
+    private GameFragment gameFragment;
 
     public DevicesFragment() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -47,13 +49,13 @@ public class DevicesFragment extends ListFragment {
         bleDiscoveryBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if(intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
+                if (intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    if(device.getType() != BluetoothDevice.DEVICE_TYPE_CLASSIC) {
+                    if (device.getType() != BluetoothDevice.DEVICE_TYPE_CLASSIC) {
                         getActivity().runOnUiThread(() -> updateScan(device));
                     }
                 }
-                if(intent.getAction().equals((BluetoothAdapter.ACTION_DISCOVERY_FINISHED))) {
+                if (intent.getAction().equals((BluetoothAdapter.ACTION_DISCOVERY_FINISHED))) {
                     stopScan();
                 }
             }
@@ -75,7 +77,7 @@ public class DevicesFragment extends ListFragment {
                     view = getActivity().getLayoutInflater().inflate(R.layout.device_list_item, parent, false);
                 TextView text1 = view.findViewById(R.id.text1);
                 TextView text2 = view.findViewById(R.id.text2);
-                if(device.getName() == null || device.getName().isEmpty())
+                if (device.getName() == null || device.getName().isEmpty())
                     text1.setText("<unnamed>");
                 else
                     text1.setText(device.getName());
@@ -100,9 +102,9 @@ public class DevicesFragment extends ListFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_devices, menu);
         this.menu = menu;
-        if(!getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH))
+        if (!getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH))
             menu.findItem(R.id.bt_settings).setEnabled(false);
-        if(bluetoothAdapter==null || !getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE))
+        if (bluetoothAdapter == null || !getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE))
             menu.findItem(R.id.ble_scan).setEnabled(false);
     }
 
@@ -110,9 +112,9 @@ public class DevicesFragment extends ListFragment {
     public void onResume() {
         super.onResume();
         getActivity().registerReceiver(bleDiscoveryBroadcastReceiver, bleDiscoveryIntentFilter);
-        if(bluetoothAdapter == null || !getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE))
+        if (bluetoothAdapter == null || !getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE))
             setEmptyText("<Le Bluetooth LE n'est pas supporté>");
-        else if(!bluetoothAdapter.isEnabled())
+        else if (!bluetoothAdapter.isEnabled())
             setEmptyText("<MDR ta désactivé le Bluetooth !?>");
         else
             setEmptyText("<Commence par scanner la zone>");
@@ -156,12 +158,16 @@ public class DevicesFragment extends ListFragment {
                 return;
             }
         }
-        listItems.clear();
-        listAdapter.notifyDataSetChanged();
-        setEmptyText("<scanning...>");
-        menu.findItem(R.id.ble_scan).setVisible(false);
-        menu.findItem(R.id.ble_scan_stop).setVisible(true);
-        bluetoothAdapter.startDiscovery();
+        if (bluetoothAdapter.isEnabled()) {
+            listItems.clear();
+            listAdapter.notifyDataSetChanged();
+            setEmptyText("<scanning...>");
+            menu.findItem(R.id.ble_scan).setVisible(false);
+            menu.findItem(R.id.ble_scan_stop).setVisible(true);
+            bluetoothAdapter.startDiscovery();
+        } else {
+            setEmptyText("<MDR ta désactivé le Bluetooth !?>");
+        }
         //  BluetoothLeScanner.startScan(...) would return more details, but that's not needed here
     }
 
@@ -169,7 +175,7 @@ public class DevicesFragment extends ListFragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         // ignore requestCode as there is only one in this fragment
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            new Handler(Looper.getMainLooper()).postDelayed(this::startScan,1); // run after onResume to avoid wrong empty-text
+            new Handler(Looper.getMainLooper()).postDelayed(this::startScan, 1); // run after onResume to avoid wrong empty-text
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(getText(R.string.location_denied_title));
@@ -180,7 +186,7 @@ public class DevicesFragment extends ListFragment {
     }
 
     private void updateScan(BluetoothDevice device) {
-        if(listItems.indexOf(device) < 0) {
+        if (listItems.indexOf(device) < 0) {
             listItems.add(device);
             Collections.sort(listItems, DevicesFragment::compareTo);
             listAdapter.notifyDataSetChanged();
@@ -189,7 +195,7 @@ public class DevicesFragment extends ListFragment {
 
     private void stopScan() {
         setEmptyText("<no bluetooth devices found>");
-        if(menu != null) {
+        if (menu != null) {
             menu.findItem(R.id.ble_scan).setVisible(true);
             menu.findItem(R.id.ble_scan_stop).setVisible(false);
         }
@@ -199,27 +205,35 @@ public class DevicesFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         stopScan();
-        BluetoothDevice device = listItems.get(position-1);
+        BluetoothDevice device = listItems.get(position - 1);
         Bundle args = new Bundle();
         args.putString("device", device.getAddress());
-        Fragment fragment = new GameFragment();
-        fragment.setArguments(args);
-        getFragmentManager().beginTransaction().replace(R.id.fragment, fragment, "game").addToBackStack(null).commit();
+        gameFragment = new GameFragment();
+        gameFragment.setArguments(args);
+        getFragmentManager().beginTransaction()
+                .replace(R.id.fragment, gameFragment, "game")
+                .addToBackStack(null).commit();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
     }
 
     /**
      * sort by name, then address. sort named devices first
      */
     static int compareTo(BluetoothDevice a, BluetoothDevice b) {
-        boolean aValid = a.getName()!=null && !a.getName().isEmpty();
-        boolean bValid = b.getName()!=null && !b.getName().isEmpty();
-        if(aValid && bValid) {
+        boolean aValid = a.getName() != null && !a.getName().isEmpty();
+        boolean bValid = b.getName() != null && !b.getName().isEmpty();
+        if (aValid && bValid) {
             int ret = a.getName().compareTo(b.getName());
             if (ret != 0) return ret;
             return a.getAddress().compareTo(b.getAddress());
         }
-        if(aValid) return -1;
-        if(bValid) return +1;
+        if (aValid) return -1;
+        if (bValid) return +1;
         return a.getAddress().compareTo(b.getAddress());
     }
 }
