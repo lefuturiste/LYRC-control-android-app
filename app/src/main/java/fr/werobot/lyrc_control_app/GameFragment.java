@@ -34,6 +34,8 @@ import android.widget.ToggleButton;
 public class GameFragment extends Fragment implements ServiceConnection, SerialListener {
 
     private View view;
+    private LinearLayout flagOne;
+    private LinearLayout flagTwo;
 
     private enum Connected {False, Pending, True}
 
@@ -47,8 +49,8 @@ public class GameFragment extends Fragment implements ServiceConnection, SerialL
     private boolean initialStart = true;
     private Connected connected = Connected.False;
 
-    private int joystickAngle = 0;
-    private int joystickStrength = 0;
+    private Integer joystickAngle = 0;
+    private Integer joystickStrength = 0;
 
     public GameFragment() {
     }
@@ -148,22 +150,28 @@ public class GameFragment extends Fragment implements ServiceConnection, SerialL
         receiveText.setTextColor(getResources().getColor(R.color.colorRecieveText)); // set as default color to reduce number of spans
         receiveText.setMovementMethod(ScrollingMovementMethod.getInstance());
         view.findViewById(R.id.buttonAction1).setOnClickListener(v -> buttonAction1Call());
-        view.findViewById(R.id.buttonAction2).setOnClickListener(v -> buttonAction2Call());
+//        view.findViewById(R.id.buttonAction2).setOnClickListener(v -> buttonAction2Call());
         JoystickView joystick = view.findViewById(R.id.joystick);
         joystick.setOnMoveListener(this::joystickUpdate);
         this.updateOrientationMessage(getResources().getConfiguration().orientation);
-        ToggleButton toggle = view.findViewById(R.id.togglebutton);
-        LinearLayout flagOne = view.findViewById(R.id.flag_one);
+        this.flagOne = view.findViewById(R.id.flag_one);
 //        LinearLayout flagTwo = view.findViewById(R.id.flag_two);
-        String redColor = "#c0392b";
-        String greenColor = "#27AE60";
-        toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//        String redColor = "#c0392b";
+//        String greenColor = "#27AE60";
+        ((ToggleButton) view.findViewById(R.id.main_arm_button)).setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                System.out.println("TRUE");
-                flagOne.setBackgroundColor(Color.parseColor(greenColor));
+                this.send("OMA");
+//                flagOne.setBackgroundColor(Color.parseColor(greenColor));
             } else {
-                System.out.println("FALSE");
-                flagOne.setBackgroundColor(Color.parseColor(redColor));
+                this.send("CMA");
+//                flagOne.setBackgroundColor(Color.parseColor(redColor));
+            }
+        });
+        ((ToggleButton) view.findViewById(R.id.secondary_arm_button)).setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                this.send("OSA");
+            } else {
+                this.send("CSA");
             }
         });
         return view;
@@ -188,7 +196,16 @@ public class GameFragment extends Fragment implements ServiceConnection, SerialL
         if (angle != joystickAngle || strength != joystickStrength) {
             joystickAngle = angle;
             joystickStrength = strength;
-            String data = "JOY#" + angle + "#" + strength;
+            int direction = 4;
+            if (joystickAngle > 45 && joystickAngle < 3 * 45) {
+                direction = 1;
+            } else if (joystickAngle > 3 * 45 && joystickAngle < 5 * 45) {
+                direction = 3;
+            } else if (joystickAngle > 5 * 45 && joystickAngle < 7 * 45) {
+                direction = 2;
+            }
+            int strengthTo255 = strength * 255 / 100;
+            String data = "JOY#" + direction + "#" + strengthTo255;
             System.out.println(data);
             this.send(data);
         }

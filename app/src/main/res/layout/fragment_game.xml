@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -60,12 +60,13 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <Button
-                            android:id="@+id/buttonAction2"
+                        <ToggleButton
+                            android:id="@+id/main_arm_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="hello" />
+                            android:textOn="Principal"
+                            android:textOff="Principal" />
                     </LinearLayout>
 
 
@@ -76,10 +77,11 @@
                         android:orientation="horizontal">
 
                         <ToggleButton
-                            android:id="@+id/togglebutton"
+                            android:id="@+id/secondary_arm_button"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="ToggleButton" />
+                            android:textOn="Secondaire"
+                            android:textOff="Secondaire" />
                     </LinearLayout>
                 </LinearLayout>
                 <!-- END BUTTONS -->
@@ -156,7 +158,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/game_portrait_text"
