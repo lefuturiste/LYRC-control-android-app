@@ -141,6 +141,12 @@ public class DevicesFragment extends ListFragment {
             intent.setAction(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
             startActivity(intent);
             return true;
+        } else if (id == R.id.controller) {
+            ControllerFragment controllerFragment = new ControllerFragment();
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.fragment, controllerFragment, "controller")
+                    .addToBackStack(null).commit();
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }

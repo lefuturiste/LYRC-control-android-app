@@ -13,4 +13,7 @@
     <item
         android:id="@+id/bt_settings"
         android:title="Paramètres BT" />
+    <item
+        android:id="@+id/controller"
+        android:title="Controller" />
 </menu>
