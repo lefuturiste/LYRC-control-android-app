@@ -196,17 +196,23 @@ public class GameFragment extends Fragment implements ServiceConnection, SerialL
         if (angle != joystickAngle || strength != joystickStrength) {
             joystickAngle = angle;
             joystickStrength = strength;
+            /*
+            1 = forward
+            2 = backward
+            3 = left
+            4 = right
+             */
             int direction = 4;
             if (joystickAngle > 45 && joystickAngle < 3 * 45) {
-                direction = 1;
+                direction = 2;
             } else if (joystickAngle > 3 * 45 && joystickAngle < 5 * 45) {
                 direction = 3;
             } else if (joystickAngle > 5 * 45 && joystickAngle < 7 * 45) {
-                direction = 2;
+                direction = 1;
             }
             int strengthTo255 = strength * 255 / 100;
             String data = "JOY#" + direction + "#" + strengthTo255;
-            System.out.println(data);
+//            System.out.println(data);
             this.send(data);
         }
     }

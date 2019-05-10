@@ -52,13 +52,14 @@ public class ControllerFragment extends Fragment {
         System.out.println("On create view called");
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
-            activity.controllerHelper.registerOnControllerInputEventListener((keyId, x, y) -> {
-                String data = keyId + "; " + x + "; " + y;
-                System.out.println(data);
+            activity.controllerHelper.registerOnControllerInputEventListener((keyId, angle, strength) -> {
+                String data = keyId + ";" + angle + ";" + strength;
+//                System.out.println(data);
                 textView.append(data + " \n");
             });
         }
         return view;
     }
+
 
 }

@@ -4,6 +4,8 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -123,7 +125,7 @@ class ControllerHelper {
         }
 
         if (controllerInputEventListener != null) {
-            controllerInputEventListener.run(axisType, x, y);
+            controllerInputEventListener.run(axisType, getAngle(x, y), getStrength(x, y));
         }
     }
 
@@ -143,10 +145,27 @@ class ControllerHelper {
     }
 
     public interface ControllerInputEventListener {
-        void run(String keyId, float x, float y);
+        void run(String keyId, int angle, int strength);
     }
 
     void registerOnControllerInputEventListener(ControllerInputEventListener controllerInputEventListener) {
         this.controllerInputEventListener = controllerInputEventListener;
+    }
+
+
+    private int getAngle(float x, float y) {
+        int angle = roundFloat((float) Math.toDegrees(Math.atan2(y, x)));
+        return angle < 0 ? angle + 360 : angle;
+    }
+
+    private int getStrength(float x, float y) {
+        float strength = (float) Math.sqrt(x*x + y*y) * 100;
+        return strength >= 100 ? 100 : roundFloat(strength);
+    }
+
+    private int roundFloat(float value) {
+        DecimalFormat df = new DecimalFormat("#");
+        df.setRoundingMode(RoundingMode.CEILING);
+        return Integer.parseInt(df.format(value));
     }
 }
