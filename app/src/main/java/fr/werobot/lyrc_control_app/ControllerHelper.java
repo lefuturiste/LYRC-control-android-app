@@ -1,5 +1,6 @@
 package fr.werobot.lyrc_control_app;
 
+import android.os.Build;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -16,20 +17,40 @@ class ControllerHelper {
     private HashMap<String, String> keyBindings = new HashMap<>();
 
     ControllerHelper() {
-        keyBindings.put("B", "cross");
-        keyBindings.put("C", "cricle");
-        keyBindings.put("A", "square");
-        keyBindings.put("X", "triangle");
-        keyBindings.put("R2", "options");
-        keyBindings.put("L2", "share");
-        keyBindings.put("Z", "right_1");
-        keyBindings.put("Y", "left_1");
-        keyBindings.put("MODE", "ps");
-        keyBindings.put("START", "right_thumb");
-        keyBindings.put("SELECT", "left_thumb");
-        keyBindings.put("THUMBL", "pad");
-        keyBindings.put("R1", "right_2");
-        keyBindings.put("L1", "left_2");
+        System.out.println("Controller helper called");
+        double release = Double.parseDouble(Build.VERSION.RELEASE.replaceAll("(\\d+[.]\\d+)(.*)","$1"));
+        System.out.println(release);
+        if (release < 9) {
+            keyBindings.put("B", "cross");
+            keyBindings.put("C", "circle");
+            keyBindings.put("A", "square");
+            keyBindings.put("X", "triangle");
+            keyBindings.put("R2", "options");
+            keyBindings.put("L2", "share");
+            keyBindings.put("Z", "right_1");
+            keyBindings.put("Y", "left_1");
+            keyBindings.put("MODE", "ps");
+            keyBindings.put("START", "right_thumb");
+            keyBindings.put("SELECT", "left_thumb");
+            keyBindings.put("THUMBL", "pad");
+            keyBindings.put("R1", "right_2");
+            keyBindings.put("L1", "left_2");
+        } else {
+            keyBindings.put("DEL", "square");
+            keyBindings.put("BACK", "circle");
+            keyBindings.put("A", "cross");
+            keyBindings.put("Y", "triangle");
+            keyBindings.put("R1", "right_1");
+            keyBindings.put("L1", "left_1");
+            keyBindings.put("R2", "right_2");
+            keyBindings.put("L2", "left_2");
+            keyBindings.put("MODE", "ps");
+            keyBindings.put("START", "options");
+            keyBindings.put("SELECT", "share");
+            keyBindings.put("THUMBR", "right_thumb");
+            keyBindings.put("THUMBL", "left_thumb");
+            keyBindings.put("1", "pad");
+        }
     }
 
     /* EVENTS INPUT */
@@ -63,7 +84,16 @@ class ControllerHelper {
     private String bindKeyCode(int keyCode) {
         String keyCodeLabel = KeyEvent.keyCodeToString(keyCode);
         keyCodeLabel = keyCodeLabel.replace("KEYCODE_BUTTON_", "");
-        return keyBindings.containsKey(keyCodeLabel) ? keyBindings.get(keyCodeLabel) : null;
+        if (keyBindings.containsKey(keyCodeLabel)) {
+            return keyBindings.get(keyCodeLabel);
+        } else {
+            keyCodeLabel = keyCodeLabel.replace("KEYCODE_", "");
+            if (keyBindings.containsKey(keyCodeLabel)) {
+                return keyBindings.get(keyCodeLabel);
+            } else {
+                return null;
+            }
+        }
     }
 
     private ArrayList<Integer> getGameControllerIds() {
