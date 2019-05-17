@@ -17,22 +17,16 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <LinearLayout
-                android:id="@+id/receive_text_container"
-                android:layout_width="288dp"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/receive_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:freezesText="true"
-                    android:gravity="bottom"
-                    android:scrollbars="vertical"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-            </LinearLayout>
+            <fr.werobot.lyrc_control_app.JoystickView xmlns:custom="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/joystick"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                custom:JV_backgroundColor="#009688"
+                custom:JV_borderColor="#00796B"
+                custom:JV_borderWidth="8dp"
+                custom:JV_buttonColor="#FF6E40"
+                custom:JV_buttonSizeRatio="15%"
+                custom:JV_fixedCenter="false" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -42,7 +36,7 @@
                 <!-- BUTTONS -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="153dp"
                     android:gravity="center"
                     android:orientation="vertical">
 
@@ -66,27 +60,13 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <Button
-                            android:id="@+id/buttonStopAll"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="stopall" />
-                    </LinearLayout>
-                    <!--
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
                         <ToggleButton
                             android:id="@+id/main_arm_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:textOff="Principal"
-                            android:textOn="Principal" />
+                            android:textOn="Principal"
+                            android:textOff="Principal" />
                     </LinearLayout>
 
 
@@ -100,9 +80,9 @@
                             android:id="@+id/secondary_arm_button"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textOff="Secondaire"
-                            android:textOn="Secondaire" />
-                    </LinearLayout>-->
+                            android:textOn="Secondaire"
+                            android:textOff="Secondaire" />
+                    </LinearLayout>
                 </LinearLayout>
                 <!-- END BUTTONS -->
 
@@ -111,62 +91,57 @@
                     android:layout_height="match_parent"
                     android:orientation="horizontal">
 
+                    <LinearLayout
+                        android:id="@+id/receive_text_container"
+                        android:layout_width="243dp"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/receive_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="164dp"
+                            android:layout_weight="1"
+                            android:freezesText="true"
+                            android:gravity="bottom"
+                            android:scrollbars="vertical"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                    </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/flag_icons_container"
-                        android:layout_width="match_parent"
+                        android:layout_width="fill_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:gravity="center"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/home_icon"
-                                android:layout_width="100dp"
-                                android:layout_height="100dp"
-                                android:padding="5dip"
-                                android:scaleType="centerCrop"
-                                app:srcCompat="@drawable/ic_home_black_24dp" />
+                            <LinearLayout
+                                android:id="@+id/flag_one"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="#c0392b"
+                                android:orientation="horizontal" />
                         </LinearLayout>
-
-
-                        <LinearLayout
-                            android:layout_width="67dp"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="horizontal" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:id="@+id/card_icon"
-                                android:layout_width="100dp"
-                                android:layout_height="100dp"
-                                android:padding="5dip"
-                                android:scaleType="centerCrop"
-                                app:srcCompat="@drawable/ic_nfc_black_24dp" />
-                        </LinearLayout>
-
-                        <!--<LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:orientation="vertical"/>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:orientation="vertical"/>-->
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:id="@+id/flag_two"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="#27AE60"
+                                android:orientation="horizontal" />
+                        </LinearLayout>
 
                     </LinearLayout>
                 </LinearLayout>
